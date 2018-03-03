@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <link href="https://fonts.googleapis.com/css?family=Lato|Roboto:300" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/data.js"></script>
+    <script src="https://code.highcharts.com/modules/series-label.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+
+    <!-- Additional files for the Highslide popup effect -->
+    <script src="https://www.highcharts.com/media/com_demo/js/highslide-full.min.js"></script>
+    <script src="https://www.highcharts.com/media/com_demo/js/highslide.config.js" charset="utf-8"></script>
+    <link rel="stylesheet" type="text/css" href="https://www.highcharts.com/media/com_demo/css/highslide.css" />
+
+    <style>
+        /*remove all !important*/
+
+        html,
+        body {
+            background: #151925;
+        }
+
+        body {
+            padding: 50px 50px 0;
+        }
+
+        header {
+            background-color: inherit; /*no need for this*/
+            height: auto !important; 
+            margin-bottom: 50px !important;
+        }
+
+        h1 {
+            margin: 0;
+            margin-bottom: 50px;
+        }
+
+        h1 a {
+            text-decoration: none;            
+            display: block;
+            outline: none;
+            width: 35px;
+        }
+
+        h1 a:focus {            
+            outline: none;
+        }
+
+        h1 a span {
+            transition: background 0.2s ease-in-out;
+            background: #717788;
+            display: block;
+            height: 1px;
+        }
+
+        h1 a:hover span {
+            transition: background 0.2s ease-in-out;
+            background: #c1c7d8;
+        }
+
+        h1 a span:not(:last-child) {
+            margin-bottom: 8px;
+        }
+
+        @media screen and (min-width: 1440px) {
+            .container {
+                width: 1400px;
+            }
+        }
+
+        @media screen and (min-width: 2000px) {
+            .container {
+                width: 1800px;
+            }
+        }
+        
+        .navigation-wrapper {
+            background: none;
+            height: auto;
+            width: 100%;
+
+        }
+
+        .navigation-wrapper ul {
+            padding: 0;
+        }
+
+        .navigation-wrapper ul li {
+            display: inline-block;
+        }
+
+        .navigation-wrapper ul li:last-child {
+            float: right;
+        }
+
+        .navigation-wrapper ul li:not(:last-child) {
+            margin-right: 50px;
+        }
+
+        .navigation-wrapper ul li a {
+            transition: color 0.2s ease-in-out;
+            font-family: 'Roboto', sans-serif;
+            text-decoration: none;
+            font-size: 20px;
+            color: #717788;
+            outline: none;
+        }
+
+        .navigation-wrapper ul li a span.dot {
+            transition: opacity 0.3s ease-in-out;
+            background: #CD4435;
+            position: absolute;
+            border-radius: 50%;
+            height: 5px;
+            opacity: 0;
+            width: 5px;
+            
+        }
+
+        .navigation-wrapper ul li a:hover,
+        .navigation-wrapper ul li a.active {
+            transition: color 0.2s ease-in-out;
+            color: #c1c7d8;
+        }
+
+        .navigation-wrapper ul li a.active span.dot {
+            transition: opacity 0.3s ease-in-out;
+            opacity: 1;
+        }
+
+        .content-wrapper {
+            position: relative;
+            height: auto;
+            width: 100%;
+        }
+
+        .content-wrapper .content {
+            transition: margin-left 0.3s ease-in-out;
+            position: absolute;
+            margin-left: 0;
+            width: 100%;
+        }
+
+        .content-wrapper .content.left {
+            transition: margin-left 0.3s ease-in-out;
+            margin-left: -3000px;
+        }
+
+        .content article {
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+            transition: box-shadow 0.3s ease-in-out;
+            background: #25273E;
+            margin-bottom: 30px;
+        }
+
+        .content article.activity-wrapper {
+
+        }
+
+        .content article.user-wrapper {
+            height: 300px;
+        }
+
+        .content article:hover {
+            box-shadow: 0 10px 10px rgba(0, 0, 0, 0.5);
+            transition: box-shadow 0.3s ease-in-out;
+        }
+
+        .content article h2 {
+            font-family: 'Roboto', sans-serif;
+            text-align: right;
+            font-size: 16px;
+            color: #c1c7d8;
+            padding: 30px;
+            margin: 0;
+        }
+    </style>
+
+    <script>
+        (function (window) {
+            var $ = window.jQuery,
+                console = window.console;
+
+            $(document).on('click', '.nav-item a', function (e) {
+                //e.preventDefault();
+                $('.nav-item a').removeClass('active');
+                $(this).addClass('active');
+            });
+
+            $(window).on('hashchange', function () {
+                console.log('>>>>>>>>>>>>>> HASH', location.hash);
+            });
+        }(this));
+    </script>
+
+    <script>
+        $.ajax({
+            url: 'https://cdn.rawgit.com/highcharts/highcharts/v6.0.4/samples/data/analytics.csv',
+            success: function (csv) {
+                Highcharts.chart('container', {
+
+                    data: {
+                        csv: csv.replace(/\n\n/g, '\n')
+                    },
+
+                    title: {
+                        text: ''
+                    },
+
+                    subtitle: {
+                        text: ''
+                    },
+
+                    xAxis: {
+                        tickInterval: 7 * 24 * 3600 * 1000, // one week
+                        tickWidth: 0,
+                        gridLineWidth: 1,
+                        labels: {
+                            // align: 'left',
+                            // x: 3,
+                            // y: -3
+                        }
+                    },
+
+                    yAxis: [{ // left y axis
+                        title: {
+                            text: null
+                        },
+                        labels: {
+                            // align: 'left',
+                            // x: 3,
+                            // y: 16,
+                            // format: '{value:.,0f}'
+                        },
+                        showFirstLabel: false
+                    }, { // right y axis
+                        linkedTo: 0,
+                        gridLineWidth: 0,
+                        opposite: true,
+                        title: {
+                            text: null
+                        },
+                        labels: {
+                            // align: 'right',
+                            // x: -3,
+                            // y: 16,
+                            // format: '{value:.,0f}'
+                        },
+                        showFirstLabel: false
+                    }],
+
+                    legend: {
+                        align: 'left',
+                        verticalAlign: 'top',
+                        borderWidth: 0
+                    },
+
+                    tooltip: {
+                        shared: true,
+                        crosshairs: true
+                    },
+
+                    plotOptions: {
+                        series: {
+                            cursor: 'pointer',
+                            point: {
+                                events: {
+                                    click: function (e) {
+                                        hs.htmlExpand(null, {
+                                            pageOrigin: {
+                                                x: e.pageX || e.clientX,
+                                                y: e.pageY || e.clientY
+                                            },
+                                            headingText: this.series.name,
+                                            maincontentText: Highcharts.dateFormat('%A, %b %e, %Y', this.x) + ':<br/> ' +
+                                                this.y + ' visits',
+                                            width: 200
+                                        });
+                                    }
+                                }
+                            },
+                            marker: {
+                                //lineWidth: 1
+                                enabled: false
+                            }
+                        }
+                    },
+
+                    series: [{
+                        name: 'All visits',
+                        lineWidth: 4,
+                        marker: {
+                            //radius: 0
+                            enabled: false
+                        }
+                    }, {
+                        name: 'New visitors'
+                    }]
+                });
+            }
+        });
+
+        Highcharts.theme = {
+            colors: ['#475dd5', '#c1c7d8'],
+            chart: {
+                backgroundColor: {}
+            },
+            title: {},
+            subtitle: {},
+            legend: {},
+            xAxis: {
+                minorGridLineWidth: 0,
+                lineColor: 'transparent',
+                gridLineColor: '',
+                labels: {
+                   enabled: false
+                }
+            },
+            yAxis: {
+                gridLineColor: '',
+                labels: {
+                   enabled: false
+                }
+            }
+        };
+
+        // Apply the theme
+        Highcharts.setOptions(Highcharts.theme);
+    </script>
+</head>
+<body>
+    <header>
+        <h1>
+            <a href="#">
+                <span class="line"></span>
+                <span class="line"></span>
+                <span class="line"></span>
+            </a>
+        </h1>
+
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <nav class="navigation-wrapper">
+                        <ul class="navigation-list">
+                            <li class="nav-item">
+                                <a href="#/recent" class="active">Recent<span class="dot"></span></a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#/my-team">My Team<span class="dot"></span></a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#/my-reports">My Reports<span class="dot"></span></a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#/all-activity">All Activity<span class="dot"></span></a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#/add">+<span class="dot"></span></a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="content-wrapper">
+            <section class="content recent">
+                <div class="row">
+                    <div class="col-md-12">
+                        <article class="activity-wrapper">
+                            <h2>Activity</h2>
+                            <div id="container" style="min-width: 310px; height: 300px; margin: 0 auto; padding: 0 30px 30px"></div>
+                        </article>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-2">
+                        <article class="user-wrapper">
+                            <h2>Users</h2>
+                            <div class="users">
+                                <span class="active">71</span>
+                                <label>Active</label>
+                                <span class="spacer"></span>
+                                <
+                            </div>
+                        </article>
+                    </div>
+
+                    <div class="col-md-5">
+                        <article class="user-wrapper">
+                            <h2>User Profiles</h2>
+                        </article>
+                    </div>
+
+                    <div class="col-md-5">
+                        <article class="user-wrapper">
+                            <h2>Profile Completeness</h2>
+                        </article>
+                    </div>
+                </div>
+            </section>
+            <!-- <section class="content team">
+                <div class="row">
+                    <div class="col-md-12">
+                        <article class="activity-wrapper focus">
+                            <h2>Activity</h2>
+                        </article>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-2">
+                        <article class="user-wrapper">
+                            <h2>Users</h2>
+                        </article>
+                    </div>
+
+                    <div class="col-md-5">
+                        <article class="user-wrapper">
+                            <h2>User Profiles</h2>
+                        </article>
+                    </div>
+
+                    <div class="col-md-5">
+                        <article class="user-wrapper">
+                            <h2>Profile Completeness</h2>
+                        </article>
+                    </div>
+                </div>
+            </section> -->
+        </div>
+    </div>
+
+</body>
+</html>
